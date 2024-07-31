@@ -46,7 +46,7 @@ func (r *imageResolver) LatestTask(ctx context.Context, obj *model.APIImage) (*m
 }
 
 // Packages is the resolver for the packages field.
-func (r *imageResolver) Packages(ctx context.Context, obj *model.APIImage, opts thirdparty.PackageFilterOptions) ([]*model.APIPackage, error) {
+func (r *imageResolver) Packages(ctx context.Context, obj *model.APIImage, opts thirdparty.PackageFilterOptions) (*PackagesResponse, error) {
 	config, err := evergreen.GetConfig(ctx)
 	if err != nil {
 		return nil, InternalServerError.Send(ctx, fmt.Sprintf("getting evergreen configuration: '%s'", err.Error()))
@@ -63,7 +63,19 @@ func (r *imageResolver) Packages(ctx context.Context, obj *model.APIImage, opts 
 		apiPackage.BuildFromService(pkg)
 		apiPackages = append(apiPackages, &apiPackage)
 	}
-	return apiPackages, nil
+	filteredPackagesCount, err := c.GetTotalNumFilteredPackages(ctx, opts)
+	if err != nil {
+		return nil, InternalServerError.Send(ctx, fmt.Sprintf("getting total number of packages with filters for image '%s': '%s'", utility.FromStringPtr(obj.ID), err.Error()))
+	}
+	totalPackagesCount, err := c.GetTotalNumFilteredPackages(ctx, thirdparty.PackageFilterOptions{AMI: utility.FromStringPtr(obj.AMI)})
+	if err != nil {
+		return nil, InternalServerError.Send(ctx, fmt.Sprintf("getting total number of packages with filters for image '%s': '%s'", utility.FromStringPtr(obj.ID), err.Error()))
+	}
+	return &PackagesResponse{
+		Packages:              apiPackages,
+		FilteredPackagesCount: &filteredPackagesCount,
+		TotalPackagesCount:    totalPackagesCount,
+	}, nil
 }
 
 // Toolchains is the resolver for the toolchains field.

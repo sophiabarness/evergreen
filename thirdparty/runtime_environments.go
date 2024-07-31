@@ -26,6 +26,8 @@ const (
 	AddedImageEntryAction   = "ADDED"
 	UpdatedImageEntryAction = "UPDATED"
 	DeletedImageEntryAction = "DELETED"
+
+	MAXIMUM = "1000000000" // Artificial limit set high because API has default limit of 10.
 )
 
 type RuntimeEnvironmentsClient struct {
@@ -131,6 +133,42 @@ func (c *RuntimeEnvironmentsClient) GetPackages(ctx context.Context, opts Packag
 	return packages, nil
 }
 
+// GetTotalNumFilteredPackages returns the total number of packages from the corresponding AMI and filters in opts. Page and Limit fields
+// are ignored.
+func (c *RuntimeEnvironmentsClient) GetTotalNumFilteredPackages(ctx context.Context, opts PackageFilterOptions) (int, error) {
+	if opts.AMI == "" {
+		return 0, errors.New("no AMI provided")
+	}
+	params := url.Values{}
+	params.Set("ami", opts.AMI)
+	params.Set("page", "0")
+	params.Set("limit", MAXIMUM)
+	params.Set("name", opts.Name)
+	params.Set("manager", opts.Manager)
+	params.Set("type", PackagesType)
+	apiURL := fmt.Sprintf("%s/rest/api/v1/image?%s", c.BaseURL, params.Encode())
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
+	if err != nil {
+		return 0, err
+	}
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Api-Key", c.APIKey)
+	resp, err := c.Client.Do(request)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		msg, _ := io.ReadAll(resp.Body)
+		return 0, errors.Errorf("HTTP request returned unexpected status '%s': %s", resp.Status, string(msg))
+	}
+	packages := []Package{}
+	if err := gimlet.GetJSON(resp.Body, &packages); err != nil {
+		return 0, errors.Wrap(err, "decoding http body")
+	}
+	return len(packages), nil
+}
+
 // OSInfoFilterOptions represents the filtering options for GetOSInfo. Each argument is optional except for the AMI field.
 type OSInfoFilterOptions struct {
 	AMI   string
@@ -201,7 +239,7 @@ func (c *RuntimeEnvironmentsClient) getImageDiff(ctx context.Context, opts Image
 	params := url.Values{}
 	params.Set("ami", opts.AMIBefore)
 	params.Set("ami2", opts.AMIAfter)
-	params.Set("limit", "1000000000") // Artificial limit set high because API has default limit of 10.
+	params.Set("limit", MAXIMUM) // Artificial limit set high because API has default limit of 10.
 	apiURL := fmt.Sprintf("%s/rest/api/v1/imageDiffs?%s", c.BaseURL, params.Encode())
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, apiURL, nil)
 	if err != nil {

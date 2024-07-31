@@ -742,6 +742,12 @@ type ComplexityRoot struct {
 		Version func(childComplexity int) int
 	}
 
+	PackagesResponse struct {
+		FilteredPackagesCount func(childComplexity int) int
+		Packages              func(childComplexity int) int
+		TotalPackagesCount    func(childComplexity int) int
+	}
+
 	Parameter struct {
 		Key   func(childComplexity int) int
 		Value func(childComplexity int) int
@@ -1480,6 +1486,12 @@ type ComplexityRoot struct {
 		Version func(childComplexity int) int
 	}
 
+	ToolchainsResponse struct {
+		FilteredToolchainsCount func(childComplexity int) int
+		Toolchains              func(childComplexity int) int
+		TotalToolchainsCount    func(childComplexity int) int
+	}
+
 	TriggerAlias struct {
 		Alias                        func(childComplexity int) int
 		BuildVariantRegex            func(childComplexity int) int
@@ -1702,7 +1714,7 @@ type ImageResolver interface {
 
 	LatestTask(ctx context.Context, obj *model.APIImage) (*model.APITask, error)
 
-	Packages(ctx context.Context, obj *model.APIImage, opts thirdparty.PackageFilterOptions) ([]*model.APIPackage, error)
+	Packages(ctx context.Context, obj *model.APIImage, opts thirdparty.PackageFilterOptions) (*PackagesResponse, error)
 	Toolchains(ctx context.Context, obj *model.APIImage, opts thirdparty.ToolchainFilterOptions) ([]*model.APIToolchain, error)
 }
 type IssueLinkResolver interface {
@@ -5214,6 +5226,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Package.Version(childComplexity), true
+
+	case "PackagesResponse.filteredPackagesCount":
+		if e.complexity.PackagesResponse.FilteredPackagesCount == nil {
+			break
+		}
+
+		return e.complexity.PackagesResponse.FilteredPackagesCount(childComplexity), true
+
+	case "PackagesResponse.packages":
+		if e.complexity.PackagesResponse.Packages == nil {
+			break
+		}
+
+		return e.complexity.PackagesResponse.Packages(childComplexity), true
+
+	case "PackagesResponse.totalPackagesCount":
+		if e.complexity.PackagesResponse.TotalPackagesCount == nil {
+			break
+		}
+
+		return e.complexity.PackagesResponse.TotalPackagesCount(childComplexity), true
 
 	case "Parameter.key":
 		if e.complexity.Parameter.Key == nil {
@@ -9080,6 +9113,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Toolchain.Version(childComplexity), true
+
+	case "ToolchainsResponse.filteredToolchainsCount":
+		if e.complexity.ToolchainsResponse.FilteredToolchainsCount == nil {
+			break
+		}
+
+		return e.complexity.ToolchainsResponse.FilteredToolchainsCount(childComplexity), true
+
+	case "ToolchainsResponse.toolchains":
+		if e.complexity.ToolchainsResponse.Toolchains == nil {
+			break
+		}
+
+		return e.complexity.ToolchainsResponse.Toolchains(childComplexity), true
+
+	case "ToolchainsResponse.totalToolchainsCount":
+		if e.complexity.ToolchainsResponse.TotalToolchainsCount == nil {
+			break
+		}
+
+		return e.complexity.ToolchainsResponse.TotalToolchainsCount(childComplexity), true
 
 	case "TriggerAlias.alias":
 		if e.complexity.TriggerAlias.Alias == nil {
@@ -25654,9 +25708,9 @@ func (ec *executionContext) _Image_packages(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*model.APIPackage)
+	res := resTmp.(*PackagesResponse)
 	fc.Result = res
-	return ec.marshalNPackage2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIPackageᚄ(ctx, field.Selections, res)
+	return ec.marshalNPackagesResponse2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐPackagesResponse(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Image_packages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -25667,14 +25721,14 @@ func (ec *executionContext) fieldContext_Image_packages(ctx context.Context, fie
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "name":
-				return ec.fieldContext_Package_name(ctx, field)
-			case "manager":
-				return ec.fieldContext_Package_manager(ctx, field)
-			case "version":
-				return ec.fieldContext_Package_version(ctx, field)
+			case "filteredPackagesCount":
+				return ec.fieldContext_PackagesResponse_filteredPackagesCount(ctx, field)
+			case "packages":
+				return ec.fieldContext_PackagesResponse_packages(ctx, field)
+			case "totalPackagesCount":
+				return ec.fieldContext_PackagesResponse_totalPackagesCount(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type PackagesResponse", field.Name)
 		},
 	}
 	defer func() {
@@ -35006,6 +35060,143 @@ func (ec *executionContext) fieldContext_Package_version(_ context.Context, fiel
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PackagesResponse_filteredPackagesCount(ctx context.Context, field graphql.CollectedField, obj *PackagesResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackagesResponse_filteredPackagesCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FilteredPackagesCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackagesResponse_filteredPackagesCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackagesResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PackagesResponse_packages(ctx context.Context, field graphql.CollectedField, obj *PackagesResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackagesResponse_packages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Packages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.APIPackage)
+	fc.Result = res
+	return ec.marshalNPackage2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIPackageᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackagesResponse_packages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackagesResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_Package_name(ctx, field)
+			case "manager":
+				return ec.fieldContext_Package_manager(ctx, field)
+			case "version":
+				return ec.fieldContext_Package_version(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Package", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PackagesResponse_totalPackagesCount(ctx context.Context, field graphql.CollectedField, obj *PackagesResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_PackagesResponse_totalPackagesCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPackagesCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_PackagesResponse_totalPackagesCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PackagesResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -61996,6 +62187,143 @@ func (ec *executionContext) fieldContext_Toolchain_version(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _ToolchainsResponse_filteredToolchainsCount(ctx context.Context, field graphql.CollectedField, obj *ToolchainsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ToolchainsResponse_filteredToolchainsCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.FilteredToolchainsCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ToolchainsResponse_filteredToolchainsCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ToolchainsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ToolchainsResponse_toolchains(ctx context.Context, field graphql.CollectedField, obj *ToolchainsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ToolchainsResponse_toolchains(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Toolchains, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.APIToolchain)
+	fc.Result = res
+	return ec.marshalNToolchain2ᚕᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIToolchainᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ToolchainsResponse_toolchains(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ToolchainsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_Toolchain_name(ctx, field)
+			case "path":
+				return ec.fieldContext_Toolchain_path(ctx, field)
+			case "version":
+				return ec.fieldContext_Toolchain_version(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Toolchain", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ToolchainsResponse_totalToolchainsCount(ctx context.Context, field graphql.CollectedField, obj *ToolchainsResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ToolchainsResponse_totalToolchainsCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalToolchainsCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ToolchainsResponse_totalToolchainsCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ToolchainsResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TriggerAlias_alias(ctx context.Context, field graphql.CollectedField, obj *model.APITriggerDefinition) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TriggerAlias_alias(ctx, field)
 	if err != nil {
@@ -80509,6 +80837,52 @@ func (ec *executionContext) _Package(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var packagesResponseImplementors = []string{"PackagesResponse"}
+
+func (ec *executionContext) _PackagesResponse(ctx context.Context, sel ast.SelectionSet, obj *PackagesResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, packagesResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PackagesResponse")
+		case "filteredPackagesCount":
+			out.Values[i] = ec._PackagesResponse_filteredPackagesCount(ctx, field, obj)
+		case "packages":
+			out.Values[i] = ec._PackagesResponse_packages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalPackagesCount":
+			out.Values[i] = ec._PackagesResponse_totalPackagesCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var parameterImplementors = []string{"Parameter"}
 
 func (ec *executionContext) _Parameter(ctx context.Context, sel ast.SelectionSet, obj *model.APIParameter) graphql.Marshaler {
@@ -88380,6 +88754,52 @@ func (ec *executionContext) _Toolchain(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var toolchainsResponseImplementors = []string{"ToolchainsResponse"}
+
+func (ec *executionContext) _ToolchainsResponse(ctx context.Context, sel ast.SelectionSet, obj *ToolchainsResponse) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, toolchainsResponseImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ToolchainsResponse")
+		case "filteredToolchainsCount":
+			out.Values[i] = ec._ToolchainsResponse_filteredToolchainsCount(ctx, field, obj)
+		case "toolchains":
+			out.Values[i] = ec._ToolchainsResponse_toolchains(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalToolchainsCount":
+			out.Values[i] = ec._ToolchainsResponse_totalToolchainsCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var triggerAliasImplementors = []string{"TriggerAlias"}
 
 func (ec *executionContext) _TriggerAlias(ctx context.Context, sel ast.SelectionSet, obj *model.APITriggerDefinition) graphql.Marshaler {
@@ -92540,6 +92960,20 @@ func (ec *executionContext) marshalNPackage2ᚖgithubᚗcomᚋevergreenᚑciᚋe
 func (ec *executionContext) unmarshalNPackageOpts2githubᚗcomᚋevergreenᚑciᚋevergreenᚋthirdpartyᚐPackageFilterOptions(ctx context.Context, v interface{}) (thirdparty.PackageFilterOptions, error) {
 	res, err := ec.unmarshalInputPackageOpts(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNPackagesResponse2githubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐPackagesResponse(ctx context.Context, sel ast.SelectionSet, v PackagesResponse) graphql.Marshaler {
+	return ec._PackagesResponse(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPackagesResponse2ᚖgithubᚗcomᚋevergreenᚑciᚋevergreenᚋgraphqlᚐPackagesResponse(ctx context.Context, sel ast.SelectionSet, v *PackagesResponse) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._PackagesResponse(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNParameter2githubᚗcomᚋevergreenᚑciᚋevergreenᚋrestᚋmodelᚐAPIParameter(ctx context.Context, sel ast.SelectionSet, v model.APIParameter) graphql.Marshaler {

@@ -26,9 +26,19 @@ type Image {
   lastDeployed: Time!
   latestTask: Task
   name: String!
-  packages(opts: PackageOpts!): [Package!]!
+  packages(opts: PackageOpts!): PackagesResponse!
   toolchains(opts: ToolchainOpts!): [Toolchain!]!
   versionId: String!
+}
+
+"""
+PackagesResponse is the return value for the packages query.
+It contains an array of Packages matching the filter conditions and count information.
+"""
+type PackagesResponse {
+  filteredPackagesCount: Int
+  packages: [Package!]!
+  totalPackagesCount: Int!
 }
 
 type Package {
@@ -37,8 +47,20 @@ type Package {
   version: String!
 }
 
+"""
+ToolchainsResponse is the return value for the toolchains query.
+It contains an array of Toolchains matching the filter conditions and count information.
+"""
+type ToolchainsResponse {
+  filteredToolchainsCount: Int
+  toolchains: [Toolchain!]!
+  totalToolchainsCount: Int!
+}
+
 type Toolchain {
   name: String!
   path: String!
   version: String!
 }
+
+

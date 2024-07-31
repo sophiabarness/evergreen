@@ -234,6 +234,14 @@ type NewDistroPayload struct {
 	NewDistroID string `json:"newDistroId"`
 }
 
+// PackagesResponse is the return value for the packages query.
+// It contains an array of Packages matching the filter conditions and count information.
+type PackagesResponse struct {
+	FilteredPackagesCount *int                `json:"filteredPackagesCount,omitempty"`
+	Packages              []*model.APIPackage `json:"packages"`
+	TotalPackagesCount    int                 `json:"totalPackagesCount"`
+}
+
 // PatchConfigure is the input to the schedulePatch mutation.
 // It contains information about how a user has configured their patch (e.g. name, tasks to run, etc).
 type PatchConfigure struct {
@@ -491,6 +499,14 @@ type TestFilterOptions struct {
 type TestSortOptions struct {
 	SortBy    TestSortCategory `json:"sortBy"`
 	Direction SortDirection    `json:"direction"`
+}
+
+// ToolchainsResponse is the return value for the toolchains query.
+// It contains an array of Toolchains matching the filter conditions and count information.
+type ToolchainsResponse struct {
+	FilteredToolchainsCount *int                  `json:"filteredToolchainsCount,omitempty"`
+	Toolchains              []*model.APIToolchain `json:"toolchains"`
+	TotalToolchainsCount    int                   `json:"totalToolchainsCount"`
 }
 
 type UpdateParsleySettingsInput struct {
